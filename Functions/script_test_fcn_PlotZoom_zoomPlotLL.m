@@ -100,7 +100,7 @@ iseven = mod(countingPoints,2)==0;
 latDataWiggled = latData+iseven*wiggle;
 LLdata = [latDataWiggled, longData, 0*latData];
 
-LLdataCellArray = fcn_INTERNAL_minFeaturesPerZoom(LLdata);
+LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLdata);
 
 % Test the function
 plotFormat = '.';
@@ -129,17 +129,18 @@ iseven = mod(countingPoints,2)==0;
 latDataWiggled = latData+iseven*wiggle;
 LLdata = [latDataWiggled, longData, 0*latData];
 
-LLdataCellArray = fcn_INTERNAL_minFeaturesPerZoom(LLdata);
+LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLdata);
+
+
 
 % Create an initial plot
+plotFormat = '.';
+handleName = [];
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
 
-
 % Test the effects of zoom level
-plotFormat = '.';
-handleName = [];
-nCols = 5;
+nCols = 7;
 ith_col = 0;
 
 % Change zoom level
@@ -148,7 +149,7 @@ subplot(1,nCols, ith_col);
 % Create an initial plot
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
-set(gca,'ZoomLevel', 25);
+set(gca,'ZoomLevel', 22);
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
 
@@ -158,7 +159,7 @@ subplot(1,nCols, ith_col);
 % Create an initial plot
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
-set(gca,'ZoomLevel', 22);
+set(gca,'ZoomLevel', 18);
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
 
@@ -178,7 +179,7 @@ subplot(1,nCols, ith_col);
 % Create an initial plot
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
-set(gca,'ZoomLevel', 10);
+set(gca,'ZoomLevel', 12);
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
 
@@ -188,11 +189,101 @@ subplot(1,nCols, ith_col);
 % Create an initial plot
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 assert(ishandle(h_geoplot));
-set(gca,'ZoomLevel', 2);
+set(gca,'ZoomLevel', 9);
 h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
+assert(ishandle(h_geoplot));
 
-% Check results
-% assert(isempty(h_geoplot));
+
+% Change zoom level
+ith_col = ith_col+1;
+subplot(1,nCols, ith_col);
+% Create an initial plot
+h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
+assert(ishandle(h_geoplot));
+set(gca,'ZoomLevel', 6);
+h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
+assert(ishandle(h_geoplot));
+
+% Change zoom level
+ith_col = ith_col+1;
+subplot(1,nCols, ith_col);
+% Create an initial plot
+h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
+assert(ishandle(h_geoplot));
+set(gca,'ZoomLevel', 3);
+h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
+assert(ishandle(h_geoplot));
+
+
+%%
+figNum = 10005; 
+titleString = sprintf('DEMO case: plot repeatedly to show effect of zooming in/out');
+fprintf(1,'Figure %.0f: %s\n',figNum, titleString);
+figure(figNum); clf; 
+
+
+% Shape file string of PA highways 
+shapeFileString = "state_college_roads.shp";
+
+% Create a geospatial table
+geospatial_table = fcn_OSM2SHP_loadShapeFile(fullfile(pwd,'Data',shapeFileString), -1);
+
+% Call the function
+[LLCoordinate_allSegments, LL_allSegments_cell] = fcn_OSM2SHP_extractLLFromGeospatialTable(geospatial_table, (-1));
+
+% Get the colorOrder
+ax = gca;
+colorOrder = ax.ColorOrder;
+Ncolors = size(colorOrder,1);
+
+clear plotFormat
+plotFormat.Color = [0 0.7 0];
+plotFormat.Marker = '.';
+plotFormat.MarkerSize = 10;
+plotFormat.LineStyle = '-';
+plotFormat.LineWidth = 3;
+
+subplot(1,2,1)
+LLIdata = [];
+for ith_segment = 1:length(LL_allSegments_cell)
+	thisColorIndex = mod(ith_segment-1,Ncolors)+1;
+	thisLLdata = LL_allSegments_cell{ith_segment};
+	NthisLLdata = size(thisLLdata,1);
+	LLIdata = [LLIdata; nan nan nan; [thisLLdata thisColorIndex*ones(NthisLLdata,1)]]; %#ok<AGROW>
+end
+[h_plot, indiciesInEachPlot]  = fcn_plotRoad_plotLLI(LLIdata, (plotFormat),  (colorOrder), (figNum)); 
+h_axis = gca;
+set(h_axis,'ZoomLevel',10);
+oldMapCenter = get(h_axis,'MapCenter');
+oldZoom = get(h_axis,'ZoomLevel');
+
+
+% Group the LL data by colors
+subplot(1,2,2)
+fcn_plotRoad_plotLL(([]), ([]), (figNum));
+h_axis = gca;
+set(h_axis,'MapCenter',oldMapCenter);
+set(h_axis,'ZoomLevel',oldZoom);
+
+LLIdataByColor = cell(Ncolors,1);
+for ith_segment = 1:length(LL_allSegments_cell)
+	thisColorIndex = mod(ith_segment-1,Ncolors)+1;
+	thisLLdata = LL_allSegments_cell{ith_segment};
+	NthisLLdata = size(thisLLdata,1);
+	thisColorData = LLIdataByColor{thisColorIndex};
+	appendedColorData = [thisColorData; nan nan thisColorIndex; [thisLLdata thisColorIndex*ones(NthisLLdata,1)]]; 
+	LLIdataByColor{thisColorIndex} = appendedColorData;
+end
+
+for ith_color = 1:Ncolors
+	LLdata = LLIdataByColor{ith_color};
+	LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLdata);
+	plotFormat.Color = colorOrder(ith_color,:);
+	handleName = sprintf('Color_%.0f',ith_color);
+	h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
+	hold on;
+end
+
 
 %% Test cases start here. These are very simple, usually trivial
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -326,34 +417,34 @@ if 1==0
 
 end
 
-
-%% fcn_INTERNAL_minFeaturesPerZoom
-function LLdataCellArray = fcn_INTERNAL_minFeaturesPerZoom(LLdata)
-
-% Find the ENU data equivalent
-gps_object = GPS(); % Initiate the class object for GPS
-
-% Use the class to convert LLA to ENU
-ENU_data = gps_object.WGSLLA2ENU(LLdata(:,1), LLdata(:,2), LLdata(:,1)*0);
-
-[zoomLevels, minMetersPerPixel] = fcn_PlotZoom_minPixelLengthPerZoom;
-Nzooms = length(zoomLevels);
-LLdataCellArray = cell(Nzooms,2);
-for ith_zoom = 1:Nzooms
-	thisMinLength = minMetersPerPixel(ith_zoom);
-	LLdataCellArray{ith_zoom,1} = zoomLevels(ith_zoom,1);
-	[~, indicesUsed] = fcn_plotRoad_stretchDataToLength(thisMinLength, ENU_data, (-1));
-	LLdataCellArray{ith_zoom,2} = LLdata(indicesUsed,:);
-end
-
-% For debugging
-if 1==0
-	for ith_zoom = 1:50:Nzooms
-		thisMinLength = minMetersPerPixel(ith_zoom);
-		LLdataCellArray{ith_zoom,1} = zoomLevels(ith_zoom,1);
-		[~, indicesUsed] = fcn_plotRoad_stretchDataToLength(thisMinLength, ENU_data, (-1));
-		LLdataCellArray{ith_zoom,2} = LLdata(indicesUsed,:);
-	end
-end
-end % Ends fcn_INTERNAL_minFeaturesPerZoom
+% 
+% %% fcn_PlotZoom_minFeaturesPerZoomLLA
+% function LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLdata)
+% 
+% % Find the ENU data equivalent
+% gps_object = GPS(); % Initiate the class object for GPS
+% 
+% % Use the class to convert LLA to ENU
+% ENU_data = gps_object.WGSLLA2ENU(LLdata(:,1), LLdata(:,2), LLdata(:,1)*0);
+% 
+% [zoomLevels, minMetersPerPixel] = fcn_PlotZoom_minPixelLengthPerZoom;
+% Nzooms = length(zoomLevels);
+% LLdataCellArray = cell(Nzooms,2);
+% for ith_zoom = 1:Nzooms
+% 	thisMinLength = minMetersPerPixel(ith_zoom);
+% 	LLdataCellArray{ith_zoom,1} = zoomLevels(ith_zoom,1);
+% 	[~, indicesUsed] = fcn_plotRoad_stretchDataToLength(thisMinLength, ENU_data, (-1));
+% 	LLdataCellArray{ith_zoom,2} = LLdata(indicesUsed,:);
+% end
+% 
+% % For debugging
+% if 1==0
+% 	for ith_zoom = 1:50:Nzooms
+% 		thisMinLength = minMetersPerPixel(ith_zoom);
+% 		LLdataCellArray{ith_zoom,1} = zoomLevels(ith_zoom,1);
+% 		[~, indicesUsed] = fcn_plotRoad_stretchDataToLength(thisMinLength, ENU_data, (-1));
+% 		LLdataCellArray{ith_zoom,2} = LLdata(indicesUsed,:);
+% 	end
+% end
+% end % Ends fcn_PlotZoom_minFeaturesPerZoomLLA
 

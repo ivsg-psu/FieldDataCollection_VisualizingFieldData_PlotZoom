@@ -26,6 +26,10 @@
 %   %   to fcn_PlotZoom_minPixelLengthPerZoom
 % - In fcn_PlotZoom_zoomPlotLL
 %   % * Renamed function to fcn_PlotZoom_zoomPlotLL
+% - In script_test_fcn_PlotZoom_stretchDataToLength
+%   % * Renamed function from script_test_fcn_plot+Road_stretchDataToLength
+% - In fcn_PlotZoom_stretchDataToLength
+%   % * Renamed function from fcn_plot+Road_stretchDataToLength
 
 % TO-DO:
 % - 2026_02_07 by Sean Brennan, sbrennan@psu.edu
@@ -64,14 +68,22 @@ end
 clear dependencyURLs dependencySubfolders
 ith_repo = 0;
 
-% ith_repo = ith_repo+1;
-% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_PathTools_PathClassLibrary';
-% dependencySubfolders{ith_repo} = {'Functions','Data'};
-% 
 ith_repo = ith_repo+1;
 dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_PathTools_GetUserInputPath';
 dependencySubfolders{ith_repo} = {''};
-% 
+
+ith_repo = ith_repo+1;
+dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/FieldDataCollection_RoadSegments_OSM2SHP';
+dependencySubfolders{ith_repo} = {'Functions','Data'};
+ 
+ith_repo = ith_repo+1;
+dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/FieldDataCollection_GPSRelatedCodes_GPSClass';
+dependencySubfolders{ith_repo} = {'Functions'};
+
+% ith_repo = ith_repo+1;
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_PathTools_PathClassLibrary';
+% dependencySubfolders{ith_repo} = {'Functions','Data'};
+ 
 % ith_repo = ith_repo+1;
 % dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/FieldDataCollection_VisualizingFieldData_PlotRoad';
 % dependencySubfolders{ith_repo} = {'Functions','Data'};
@@ -135,6 +147,11 @@ setenv('MATLABFLAG_PLOTROAD_REFERENCE_ALTITUDE','344.189');
 % plotting data
 setenv('MATLABFLAG_PLOTROAD_ALIGNMATLABLLAPLOTTINGIMAGES_LAT','-0.0000008');
 setenv('MATLABFLAG_PLOTROAD_ALIGNMATLABLLAPLOTTINGIMAGES_LON','0.0000054');
+
+%% Test the repo
+if 1==0
+	fcn_DebugTools_testRepoForRelease('_PlotZoom_');
+end
 
 %% Start of Demo Code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
