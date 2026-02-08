@@ -229,6 +229,74 @@ shapeFileString = "state_college_roads.shp";
 geospatial_table = fcn_OSM2SHP_loadShapeFile(fullfile(pwd,'Data',shapeFileString), -1);
 
 % Call the function
+[~, LL_allSegments_cell] = fcn_OSM2SHP_extractLLFromGeospatialTable(geospatial_table, (-1));
+
+% Get the colorOrder
+ax = gca;
+colorOrder = ax.ColorOrder;
+Ncolors = size(colorOrder,1);
+
+LLIdata = [];
+for ith_segment = 1:length(LL_allSegments_cell)
+	thisColorIndex = mod(ith_segment-1,Ncolors)+1;
+	thisLLdata = LL_allSegments_cell{ith_segment};
+	NthisLLdata = size(thisLLdata,1);
+	LLIdata = [LLIdata; nan nan nan; [thisLLdata thisColorIndex*ones(NthisLLdata,1)]]; %#ok<AGROW>
+end
+
+
+% Downsample the LL data by size
+LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLIdata);
+
+%%
+clear plotFormat
+plotFormat.Color = [0 0.7 0];
+plotFormat.Marker = '.';
+plotFormat.MarkerSize = 10;
+plotFormat.LineStyle = '-';
+plotFormat.LineWidth = 3;
+
+
+ZoomUsed = 15;
+
+subplot(1,2,1)
+fcn_plotRoad_plotLLI(LLIdata, (plotFormat),  (colorOrder), (figNum)); 
+h_axis = gca;
+set(h_axis,'ZoomLevel',ZoomUsed);
+oldMapCenter = get(h_axis,'MapCenter');
+oldZoom = get(h_axis,'ZoomLevel');
+
+
+subplot(1,2,2)
+fcn_plotRoad_plotLL(([]), ([]), (figNum));
+h_axis = gca;
+set(h_axis,'MapCenter',oldMapCenter);
+set(h_axis,'ZoomLevel',oldZoom);
+
+% h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), ([]), (figNum));
+allZoomLevels = cell2mat(LLdataCellArray(:,1));
+closestZoomIndex = find(round(allZoomLevels,3)==ZoomUsed,1);
+dataToPlot = LLdataCellArray{closestZoomIndex,2};
+Nplotted = length(dataToPlot(:,1));
+Ntotal = length(LLdataCellArray{end,2}(:,1));
+fcn_plotRoad_plotLLI(dataToPlot, (plotFormat),  (colorOrder), (figNum)); 
+title(sprintf('Reduction: %.2f%%',Nplotted*100/Ntotal));
+
+
+%% DEMO case: Complex with segment colors
+figNum = 10006; 
+titleString = sprintf('DEMO case: Complex with segment colors');
+fprintf(1,'Figure %.0f: %s\n',figNum, titleString);
+figure(figNum); clf; 
+
+
+% Shape file string of PA highways 
+shapeFileString = "state_college_roads.shp";
+
+% Create a geospatial table
+geospatial_table = fcn_OSM2SHP_loadShapeFile(fullfile(pwd,'Data',shapeFileString), -1);
+
+% Call the function
 [LLCoordinate_allSegments, LL_allSegments_cell] = fcn_OSM2SHP_extractLLFromGeospatialTable(geospatial_table, (-1));
 
 % Get the colorOrder
@@ -283,6 +351,7 @@ for ith_color = 1:Ncolors
 	h_geoplot = fcn_PlotZoom_zoomPlotLL((LLdataCellArray), (plotFormat), (handleName), (figNum));
 	hold on;
 end
+
 
 
 %% Test cases start here. These are very simple, usually trivial
