@@ -221,34 +221,42 @@ titleString = sprintf('DEMO case: plot repeatedly to show effect of zooming in/o
 fprintf(1,'Figure %.0f: %s\n',figNum, titleString);
 figure(figNum); clf; 
 
+testDataName = fullfile(pwd,'Data','testData_zoomPlotLL.mat');
+if exist(testDataName,'file')
+	load(testDataName,'LLIdata','LLdataCellArray');
+else
 
-% Shape file string of PA highways 
-shapeFileString = "state_college_roads.shp";
+	% Shape file string of PA highways
+	shapeFileString = "state_college_roads.shp";
 
-% Create a geospatial table
-geospatial_table = fcn_OSM2SHP_loadShapeFile(fullfile(pwd,'Data',shapeFileString), -1);
+	% Create a geospatial table
+	geospatial_table = fcn_OSM2SHP_loadShapeFile(fullfile(pwd,'Data',shapeFileString), -1);
 
-% Call the function
-[~, LL_allSegments_cell] = fcn_OSM2SHP_extractLLFromGeospatialTable(geospatial_table, (-1));
+	% Call the function
+	[~, LL_allSegments_cell] = fcn_OSM2SHP_extractLLFromGeospatialTable(geospatial_table, (-1));
 
-% Get the colorOrder
-ax = gca;
-colorOrder = ax.ColorOrder;
-Ncolors = size(colorOrder,1);
+	% Get the colorOrder
+	ax = gca;
+	colorOrder = ax.ColorOrder;
+	Ncolors = size(colorOrder,1);
 
-LLIdata = [];
-for ith_segment = 1:length(LL_allSegments_cell)
-	thisColorIndex = mod(ith_segment-1,Ncolors)+1;
-	thisLLdata = LL_allSegments_cell{ith_segment};
-	NthisLLdata = size(thisLLdata,1);
-	LLIdata = [LLIdata; nan nan nan; [thisLLdata thisColorIndex*ones(NthisLLdata,1)]]; %#ok<AGROW>
+	LLIdata = [];
+	for ith_segment = 1:length(LL_allSegments_cell)
+		thisColorIndex = mod(ith_segment-1,Ncolors)+1;
+		thisLLdata = LL_allSegments_cell{ith_segment};
+		NthisLLdata = size(thisLLdata,1);
+		LLIdata = [LLIdata; nan nan nan; [thisLLdata thisColorIndex*ones(NthisLLdata,1)]]; %#ok<AGROW>
+	end
+
+	% Downsample the LL data by size
+	LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLIdata);
+
+	save(testDataName,'LLIdata','LLdataCellArray');
 end
 
 
-% Downsample the LL data by size
-LLdataCellArray = fcn_PlotZoom_minFeaturesPerZoomLLA(LLIdata);
 
-%%
+
 clear plotFormat
 plotFormat.Color = [0 0.7 0];
 plotFormat.Marker = '.';
