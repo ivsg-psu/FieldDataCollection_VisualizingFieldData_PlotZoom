@@ -221,6 +221,11 @@ titleString = sprintf('DEMO case: plot repeatedly to show effect of zooming in/o
 fprintf(1,'Figure %.0f: %s\n',figNum, titleString);
 figure(figNum); clf; 
 
+% Get the colorOrder
+ax = gca;
+colorOrder = ax.ColorOrder;
+Ncolors = size(colorOrder,1);
+
 testDataName = fullfile(pwd,'Data','testData_zoomPlotLL.mat');
 if exist(testDataName,'file')
 	load(testDataName,'LLIdata','LLdataCellArray');
@@ -235,10 +240,7 @@ else
 	% Call the function
 	[~, LL_allSegments_cell] = fcn_OSM2SHP_extractLLFromGeospatialTable(geospatial_table, (-1));
 
-	% Get the colorOrder
-	ax = gca;
-	colorOrder = ax.ColorOrder;
-	Ncolors = size(colorOrder,1);
+
 
 	LLIdata = [];
 	for ith_segment = 1:length(LL_allSegments_cell)
